@@ -10,10 +10,6 @@ The original authors remain the owners and copyright holders.
 
 See original codebase at https://github.com/bumptech/stud
 
-Muhammad Shahzad Shafi
-
-<shaheryarkh@gmail.com>
-
 
 ~~Stud is now officially abandonware, thanks for playing.~~
 

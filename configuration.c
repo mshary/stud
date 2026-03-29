@@ -47,6 +47,7 @@
 #define CFG_WRITE_PROXY "write-proxy"
 #define CFG_PEM_FILE "pem-file"
 #define CFG_PROXY_PROXY "proxy-proxy"
+#define CFG_DEBUG "debug"
 
 #ifdef USE_SHARED_CACHE
   #define CFG_SHARED_CACHE "shared-cache"
@@ -147,6 +148,7 @@ stud_config * config_new (void) {
   r->TCP_KEEPALIVE_TIME = 3600;
   r->DAEMONIZE          = 0;
   r->PREFER_SERVER_CIPHERS = 0;
+  r->DEBUG              = 0;
 
   return r;
 }
@@ -716,6 +718,9 @@ void config_param_validate (char *k, char *v, stud_config *cfg, char *file, int 
       }
     }
   }
+  else if (strcmp(k, CFG_DEBUG) == 0) {
+    r = config_param_val_bool(v, &cfg->DEBUG);
+  }
   else {
     fprintf(
       stderr,
@@ -941,6 +946,8 @@ void config_print_usage_fd (char *prog, stud_config *cfg, FILE *out) {
   fprintf(out, "      --proxy-proxy          Proxy HaProxy's PROXY (IPv4 or IPv6) protocol line\n" );
   fprintf(out, "                             before actual data\n");
   fprintf(out, "                             (Default: %s)\n", config_disp_bool(cfg->PROXY_PROXY_LINE));
+  fprintf(out, "      --debug                Log all unencrypted requests and response data\n");
+  fprintf(out, "                             (Default: %s)\n", config_disp_bool(cfg->DEBUG));
   fprintf(out, "\n");
   fprintf(out, "  -t  --test                 Test configuration and exit\n");
   fprintf(out, "  -V  --version              Print program version and exit\n");
@@ -1184,6 +1191,7 @@ void config_parse_cli(int argc, char **argv, stud_config *cfg) {
     { CFG_WRITE_IP, 0, &cfg->WRITE_IP_OCTET, 1 },
     { CFG_WRITE_PROXY, 0, &cfg->WRITE_PROXY_LINE, 1 },
     { CFG_PROXY_PROXY, 0, &cfg->PROXY_PROXY_LINE, 1 },
+    { CFG_DEBUG, 0, &cfg->DEBUG, 1 },
 
     { "test", 0, NULL, 't' },
     { "version", 0, NULL, 'V' },

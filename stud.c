@@ -185,6 +185,14 @@ typedef struct proxystate {
       if (CONFIG->SYSLOG) syslog(LOG_ERR, __VA_ARGS__);     \
     } while(0)
 
+#define DEBUG_LOG(...)                                      \
+    do {                                                    \
+      if (CONFIG->DEBUG) {                                  \
+        fprintf(stderr, __VA_ARGS__);                       \
+        if (CONFIG->SYSLOG) syslog(LOG_INFO, __VA_ARGS__);  \
+      }                                                     \
+    } while(0)
+
 #define NULL_DEV "/dev/null"
 
 /* Set a file descriptor (socket) to non-blocking mode */
@@ -976,6 +984,19 @@ static void clear_read(struct ev_loop *loop, ev_io *w, int revents) {
     t = recv(fd, buf, RING_DATA_LEN, 0);
 
     if (t > 0) {
+        /* Debug logging: log unencrypted data from backend to stud */
+        if (CONFIG->DEBUG) {
+            DEBUG_LOG("{debug} [backend->stud] %d bytes: ", t);
+            for (int i = 0; i < t && i < 64; i++) {
+                if (isprint((unsigned char)buf[i]) && buf[i] != '\r' && buf[i] != '\n')
+                    DEBUG_LOG("%c", buf[i]);
+                else
+                    DEBUG_LOG("\\x%02x", (unsigned char)buf[i]);
+            }
+            if (t > 64) DEBUG_LOG("...");
+            DEBUG_LOG("\n");
+        }
+        
         ringbuffer_write_append(&ps->ring_clear2ssl, t);
         if (ringbuffer_is_full(&ps->ring_clear2ssl))
             ev_io_stop(loop, &ps->ev_r_clear);
@@ -1006,6 +1027,19 @@ static void clear_write(struct ev_loop *loop, ev_io *w, int revents) {
     t = send(fd, next, sz, MSG_NOSIGNAL);
 
     if (t > 0) {
+        /* Debug logging: log unencrypted data from stud to backend */
+        if (CONFIG->DEBUG) {
+            DEBUG_LOG("{debug} [stud->backend] %d bytes: ", t);
+            for (int i = 0; i < t && i < 64; i++) {
+                if (isprint((unsigned char)next[i]) && next[i] != '\r' && next[i] != '\n')
+                    DEBUG_LOG("%c", next[i]);
+                else
+                    DEBUG_LOG("\\x%02x", (unsigned char)next[i]);
+            }
+            if (t > 64) DEBUG_LOG("...");
+            DEBUG_LOG("\n");
+        }
+        
         if (t == sz) {
             ringbuffer_read_pop(&ps->ring_ssl2clear);
             if (ps->handshaked)
@@ -1270,6 +1304,19 @@ static void ssl_read(struct ev_loop *loop, ev_io *w, int revents) {
     }
 
     if (t > 0) {
+        /* Debug logging: log unencrypted data from client to stud */
+        if (CONFIG->DEBUG) {
+            DEBUG_LOG("{debug} [client->stud] %d bytes: ", t);
+            for (int i = 0; i < t && i < 64; i++) {
+                if (isprint((unsigned char)buf[i]) && buf[i] != '\r' && buf[i] != '\n')
+                    DEBUG_LOG("%c", buf[i]);
+                else
+                    DEBUG_LOG("\\x%02x", (unsigned char)buf[i]);
+            }
+            if (t > 64) DEBUG_LOG("...");
+            DEBUG_LOG("\n");
+        }
+        
         ringbuffer_write_append(&ps->ring_ssl2clear, t);
         if (ringbuffer_is_full(&ps->ring_ssl2clear))
             ev_io_stop(loop, &ps->ev_r_ssl);
@@ -1298,6 +1345,19 @@ static void ssl_write(struct ev_loop *loop, ev_io *w, int revents) {
     char * next = ringbuffer_read_next(&ps->ring_clear2ssl, &sz);
     t = SSL_write(ps->ssl, next, sz);
     if (t > 0) {
+        /* Debug logging: log unencrypted data from stud to client */
+        if (CONFIG->DEBUG) {
+            DEBUG_LOG("{debug} [stud->client] %d bytes: ", t);
+            for (int i = 0; i < t && i < 64; i++) {
+                if (isprint((unsigned char)next[i]) && next[i] != '\r' && next[i] != '\n')
+                    DEBUG_LOG("%c", next[i]);
+                else
+                    DEBUG_LOG("\\x%02x", (unsigned char)next[i]);
+            }
+            if (t > 64) DEBUG_LOG("...");
+            DEBUG_LOG("\n");
+        }
+        
         if (t == sz) {
             ringbuffer_read_pop(&ps->ring_clear2ssl);
             if (ps->clear_connected)

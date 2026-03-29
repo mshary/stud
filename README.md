@@ -10,16 +10,16 @@ The original authors remain the owners and copyright holders.
 
 See original codebase at https://github.com/bumptech/stud
 
---
 Muhammad Shahzad Shafi
-Email: <shaheryarkh@gmail.com>
+
+<shaheryarkh@gmail.com>
 
 
-~~Stud is now officially abandonware, thanks for playing.
+~~Stud is now officially abandonware, thanks for playing.~~
 
-~~Recommended alternative: https://github.com/varnish/hitch
+~~Recommended alternative: https://github.com/varnish/hitch~~
 
-~~More info: https://blog.jamwt.com/2016/03/21/stud-no-more/
+~~More info: https://blog.jamwt.com/2016/03/21/stud-no-more/~~
 
 stud - The Scalable TLS Unwrapping Daemon
 =========================================

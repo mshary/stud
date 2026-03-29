@@ -1,11 +1,25 @@
 STATUS
 ======
 
-Stud is now officially abandonware, thanks for playing.
+Stud has been long dead but I had to resurrect it for a client
+project. Besides the dependency and security update patches,
+I have also added many new features per my project needs.
 
-Recommended alternative: https://github.com/varnish/hitch
+Feel free to use and extend it per end-user license agreement.
+The original authors remain the owners and copyright holders.
 
-More info: https://blog.jamwt.com/2016/03/21/stud-no-more/
+See original codebase at https://github.com/bumptech/stud
+
+--
+Muhammad Shahzad Shafi
+Email: <shaheryarkh@gmail.com>
+
+
+~~Stud is now officially abandonware, thanks for playing.
+
+~~Recommended alternative: https://github.com/varnish/hitch
+
+~~More info: https://blog.jamwt.com/2016/03/21/stud-no-more/
 
 stud - The Scalable TLS Unwrapping Daemon
 =========================================

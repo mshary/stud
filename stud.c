@@ -986,14 +986,10 @@ static void clear_read(struct ev_loop *loop, ev_io *w, int revents) {
     if (t > 0) {
         /* Debug logging: log unencrypted data from backend to stud */
         if (CONFIG->DEBUG) {
-            DEBUG_LOG("{debug} [backend->stud] %d bytes: ", t);
-            for (int i = 0; i < t && i < 64; i++) {
-                if (isprint((unsigned char)buf[i]) && buf[i] != '\r' && buf[i] != '\n')
-                    DEBUG_LOG("%c", buf[i]);
-                else
-                    DEBUG_LOG("\\x%02x", (unsigned char)buf[i]);
+            DEBUG_LOG("{debug} [backend->stud] %d bytes:\n", t);
+            for (int i = 0; i < t; i++) {
+                DEBUG_LOG("%c", buf[i]);
             }
-            if (t > 64) DEBUG_LOG("...");
             DEBUG_LOG("\n");
         }
         
@@ -1029,14 +1025,10 @@ static void clear_write(struct ev_loop *loop, ev_io *w, int revents) {
     if (t > 0) {
         /* Debug logging: log unencrypted data from stud to backend */
         if (CONFIG->DEBUG) {
-            DEBUG_LOG("{debug} [stud->backend] %d bytes: ", t);
-            for (int i = 0; i < t && i < 64; i++) {
-                if (isprint((unsigned char)next[i]) && next[i] != '\r' && next[i] != '\n')
-                    DEBUG_LOG("%c", next[i]);
-                else
-                    DEBUG_LOG("\\x%02x", (unsigned char)next[i]);
+            DEBUG_LOG("{debug} [stud->backend] %d bytes:\n", t);
+            for (int i = 0; i < t; i++) {
+                DEBUG_LOG("%c", next[i]);
             }
-            if (t > 64) DEBUG_LOG("...");
             DEBUG_LOG("\n");
         }
         
@@ -1306,14 +1298,10 @@ static void ssl_read(struct ev_loop *loop, ev_io *w, int revents) {
     if (t > 0) {
         /* Debug logging: log unencrypted data from client to stud */
         if (CONFIG->DEBUG) {
-            DEBUG_LOG("{debug} [client->stud] %d bytes: ", t);
-            for (int i = 0; i < t && i < 64; i++) {
-                if (isprint((unsigned char)buf[i]) && buf[i] != '\r' && buf[i] != '\n')
-                    DEBUG_LOG("%c", buf[i]);
-                else
-                    DEBUG_LOG("\\x%02x", (unsigned char)buf[i]);
+            DEBUG_LOG("{debug} [client->stud] %d bytes:\n", t);
+            for (int i = 0; i < t; i++) {
+                DEBUG_LOG("%c", buf[i]);
             }
-            if (t > 64) DEBUG_LOG("...");
             DEBUG_LOG("\n");
         }
         
@@ -1347,14 +1335,10 @@ static void ssl_write(struct ev_loop *loop, ev_io *w, int revents) {
     if (t > 0) {
         /* Debug logging: log unencrypted data from stud to client */
         if (CONFIG->DEBUG) {
-            DEBUG_LOG("{debug} [stud->client] %d bytes: ", t);
-            for (int i = 0; i < t && i < 64; i++) {
-                if (isprint((unsigned char)next[i]) && next[i] != '\r' && next[i] != '\n')
-                    DEBUG_LOG("%c", next[i]);
-                else
-                    DEBUG_LOG("\\x%02x", (unsigned char)next[i]);
+            DEBUG_LOG("{debug} [stud->client] %d bytes:\n", t);
+            for (int i = 0; i < t; i++) {
+                DEBUG_LOG("%c", next[i]);
             }
-            if (t > 64) DEBUG_LOG("...");
             DEBUG_LOG("\n");
         }
         

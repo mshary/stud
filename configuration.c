@@ -1338,6 +1338,12 @@ void config_parse_cli(int argc, char **argv, stud_config *cfg) {
   if (cfg->WRITE_IP_OCTET && cfg->PROXY_PROXY_LINE)
     config_die("Options --write-ip and --proxy-proxy are mutually exclusive.");
 
+  /* --debug and --daemon are mutually exclusive */
+  if (cfg->DEBUG && cfg->DAEMONIZE) {
+    fprintf(stderr, "WARNING: Options --debug and --daemon are mutually exclusive. Ignoring --daemon option.\n");
+    cfg->DAEMONIZE = 0;
+  }
+
   if (cfg->DAEMONIZE) {
     cfg->SYSLOG = 1;
     cfg->QUIET = 1;

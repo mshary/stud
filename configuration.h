@@ -23,7 +23,11 @@ typedef struct shcupd_peer_opt {
 
 typedef enum {
     ENC_TLS,
-    ENC_SSL
+    ENC_SSL,
+    ENC_TLS11,
+    ENC_TLS12,
+    ENC_TLS13,
+    ENC_TLS_ALL
 } ENC_TYPE;
 
 typedef enum {

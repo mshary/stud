@@ -1,0 +1,82 @@
+[Unit]
+Description=stud - The Scalable TLS Unwrapping Daemon
+Documentation=man:stud(8) file:///usr/share/doc/stud/README.md
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+
+# User and group to run as
+User=stud
+Group=stud
+
+# Main executable using wrapper script
+ExecStart=/usr/local/lib/stud/stud-wrapper.sh
+
+# Alternatively, direct command line (uncomment and customize):
+# ExecStart=/usr/local/bin/stud \
+#   --frontend="[::]:8443" \
+#   --backend="127.0.0.1:8000" \
+#   --tls12 \
+#   --ciphers="ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256" \
+#   --prefer-server-ciphers \
+#   --workers=4 \
+#   --backlog=1024 \
+#   --keepalive=3600 \
+#   --syslog \
+#   --syslog-facility=daemon \
+#   --write-proxy \
+#   /etc/ssl/certs/stud.pem
+
+# Environment variables for wrapper script
+Environment=STUD_CONFIG=/etc/stud/stud.conf
+Environment=STUD_BINARY=/usr/local/bin/stud
+
+# Working directory
+WorkingDirectory=/var/lib/stud
+
+# Security and sandboxing
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectControlGroups=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+MemoryDenyWriteExecute=true
+LockPersonality=true
+
+# Capabilities
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+
+# Read/write paths
+ReadWritePaths=/var/lib/stud
+ReadOnlyPaths=/etc/ssl/certs /usr/local/bin/stud /usr/local/lib/stud
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=512
+LimitCORE=infinity
+
+# Restart policy
+Restart=on-failure
+RestartSec=5s
+
+# Kill settings
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=30s
+
+# Standard output/error
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=stud
+
+[Install]
+WantedBy=multi-user.target

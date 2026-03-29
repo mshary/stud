@@ -543,6 +543,18 @@ void config_param_validate (char *k, char *v, stud_config *cfg, char *file, int 
   else if (strcmp(k, "ssl") == 0) {
     cfg->ETYPE = ENC_SSL;
   }
+  else if (strcmp(k, "tls11") == 0) {
+    cfg->ETYPE = ENC_TLS11;
+  }
+  else if (strcmp(k, "tls12") == 0) {
+    cfg->ETYPE = ENC_TLS12;
+  }
+  else if (strcmp(k, "tls13") == 0) {
+    cfg->ETYPE = ENC_TLS13;
+  }
+  else if (strcmp(k, "tls-all") == 0) {
+    cfg->ETYPE = ENC_TLS_ALL;
+  }
   else if (strcmp(k, CFG_CIPHERS) == 0) {
     if (v != NULL && strlen(v) > 0) {
       config_assign_str(&cfg->CIPHER_SUITE, v);
@@ -867,6 +879,10 @@ void config_print_usage_fd (char *prog, stud_config *cfg, FILE *out) {
   fprintf(out, "\n");
   fprintf(out, "      --tls                   TLSv1 (default)\n");
   fprintf(out, "      --ssl                   SSLv3 (implies no TLSv1)\n");
+  fprintf(out, "      --tls11                 TLSv1.1 only\n");
+  fprintf(out, "      --tls12                 TLSv1.2 only\n");
+  fprintf(out, "      --tls13                 TLSv1.3 only\n");
+  fprintf(out, "      --tls-all               All TLS versions (TLSv1.0 through TLSv1.3)\n");
   fprintf(out, "  -c  --ciphers=SUITE         Sets allowed ciphers (Default: \"%s\")\n", config_disp_str(cfg->CIPHER_SUITE));
   fprintf(out, "  -e  --ssl-engine=NAME       Sets OpenSSL engine (Default: \"%s\")\n", config_disp_str(cfg->ENGINE));
   fprintf(out, "  -O  --prefer-server-ciphers Prefer server list order\n");
@@ -1126,7 +1142,7 @@ void config_print_usage (char *prog, stud_config *cfg) {
 }
 
 void config_parse_cli(int argc, char **argv, stud_config *cfg) {
-  static int tls = 0, ssl = 0;
+  static int tls = 0, ssl = 0, tls11 = 0, tls12 = 0, tls13 = 0, tls_all = 0;
   static int client = 0;
   int c, i;
   int test_only = 0;
@@ -1140,6 +1156,10 @@ void config_parse_cli(int argc, char **argv, stud_config *cfg) {
 
     { "tls", 0, &tls, 1},
     { "ssl", 0, &ssl, 1},
+    { "tls11", 0, &tls11, 1},
+    { "tls12", 0, &tls12, 1},
+    { "tls13", 0, &tls13, 1},
+    { "tls-all", 0, &tls_all, 1},
     { "client", 0, &client, 1},
     { CFG_CIPHERS, 1, NULL, 'c' },
     { CFG_PREFER_SERVER_CIPHERS, 0, NULL, 'O' },
@@ -1270,14 +1290,32 @@ void config_parse_cli(int argc, char **argv, stud_config *cfg) {
 
   prog = argv[0];
 
-  if (tls && ssl)
-    config_die("Options --tls and --ssl are mutually exclusive.");
-  else {
-    if (ssl)
-      cfg->ETYPE = ENC_SSL;
-    else if (tls)
-      cfg->ETYPE = ENC_TLS;
-  }
+  // Check for mutually exclusive TLS version options
+  int tls_options_count = 0;
+  if (tls) tls_options_count++;
+  if (ssl) tls_options_count++;
+  if (tls11) tls_options_count++;
+  if (tls12) tls_options_count++;
+  if (tls13) tls_options_count++;
+  if (tls_all) tls_options_count++;
+  
+  if (tls_options_count > 1)
+    config_die("TLS version options (--tls, --ssl, --tls11, --tls12, --tls13, --tls-all) are mutually exclusive.");
+  
+  // Set the appropriate encryption type
+  if (ssl)
+    cfg->ETYPE = ENC_SSL;
+  else if (tls11)
+    cfg->ETYPE = ENC_TLS11;
+  else if (tls12)
+    cfg->ETYPE = ENC_TLS12;
+  else if (tls13)
+    cfg->ETYPE = ENC_TLS13;
+  else if (tls_all)
+    cfg->ETYPE = ENC_TLS_ALL;
+  else if (tls)
+    cfg->ETYPE = ENC_TLS;
+  // else keep default (ENC_TLS)
 
   if (client) {
       cfg->PMODE = SSL_CLIENT;

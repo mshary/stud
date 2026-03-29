@@ -109,6 +109,10 @@ Detail about the entire set of options can be found by invoking `stud -h`:
 
           --tls                   TLSv1 (default)
           --ssl                   SSLv3 (implies no TLSv1)
+          --tls11                 TLSv1.1 only
+          --tls12                 TLSv1.2 only
+          --tls13                 TLSv1.3 only (requires OpenSSL 1.1.1 or newer)
+          --tls-all               All TLS versions (TLSv1.0 through TLSv1.3)
       -c  --ciphers=SUITE         Sets allowed ciphers (Default: "")
       -e  --ssl-engine=NAME       Sets OpenSSL engine (Default: "")
       -O  --prefer-server-ciphers Prefer server list order

@@ -43,6 +43,10 @@ CERT_FILE=""
 # offloading HTTPS.
 TLS_ONLY="0"
 
+# TLS version (tls, ssl, tls11, tls12, tls13, tls-all)
+# Default is "tls" for TLSv1.0
+TLS_VERSION="tls"
+
 # cipher suite (run openssl ciphers for full list)
 CIPHER_SUITE="HIGH"
 
@@ -182,11 +186,35 @@ _real_single_instance_start() {
   opts="-f ${FRONTEND_ADDRESS}"
   opts="${opts} -b ${BACKEND_ADDRESS}"
   
-  if [ "${TLS_ONLY}" = "1" ]; then
-    opts="${opts} --tls"
-  else
-    opts="${opts} --ssl"
-  fi
+  # Set TLS version based on TLS_VERSION variable
+  case "${TLS_VERSION}" in
+    tls)
+      opts="${opts} --tls"
+      ;;
+    ssl)
+      opts="${opts} --ssl"
+      ;;
+    tls11)
+      opts="${opts} --tls11"
+      ;;
+    tls12)
+      opts="${opts} --tls12"
+      ;;
+    tls13)
+      opts="${opts} --tls13"
+      ;;
+    tls-all)
+      opts="${opts} --tls-all"
+      ;;
+    *)
+      # Default to TLSv1.0 for backward compatibility
+      if [ "${TLS_ONLY}" = "1" ]; then
+        opts="${opts} --tls"
+      else
+        opts="${opts} --ssl"
+      fi
+      ;;
+  esac
 
   test ! -z "${CIPHER_SUITE}" && opts="${opts} -c ${CIPHER_SUITE}"
   test ! -z "${ENGINE}" && opts="${opts} -e ${ENGINE}"
@@ -608,7 +636,7 @@ stud_config_instances_list() {
 }
 
 stud_single_instance_config_print() {
-  head -n 151 "$0" | tail -n 123
+  head -n 152 "$0" | tail -n 124
 }
 
 stud_single_instance_config_load() {

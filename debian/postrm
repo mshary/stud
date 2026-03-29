@@ -5,8 +5,17 @@ case "$1" in
 		# This package is being removed, but its configuration has not yet
 		# been purged.
 
-		# stud shouldn't start at system startup
-		# update-rc.d -f stud remove
+		# Disable service on removal
+		if [ -d /run/systemd/system ]; then
+			# Systemd
+			systemctl disable stud.service >/dev/null 2>&1 || true
+			systemctl stop stud.service >/dev/null 2>&1 || true
+		else
+			# SysV init
+			if [ -x /usr/sbin/update-rc.d ]; then
+				update-rc.d -f stud remove >/dev/null 2>&1 || true
+			fi
+		fi
 	
 		# remove rundir
 		rm -rf /var/run/stud >/dev/null 2>&1

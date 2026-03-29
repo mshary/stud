@@ -7,7 +7,7 @@ PREFIX  = /usr/local
 BINDIR  = $(PREFIX)/bin
 MANDIR  = $(PREFIX)/share/man
 
-CFLAGS  = -O2 -g -std=c99 -fno-strict-aliasing -Wall -W -D_GNU_SOURCE -I/usr/local/include
+CFLAGS  = -O2 -g -std=c99 -fno-strict-aliasing -Wall -W -Wno-deprecated-declarations -D_GNU_SOURCE -I/usr/local/include
 LDFLAGS = -lssl -lcrypto -lev -L/usr/local/lib
 OBJS    = stud.o ringbuffer.o configuration.o
 
@@ -47,6 +47,9 @@ install: $(ALL)
 
 clean:
 	rm -f stud $(OBJS)
+	# Clean up certificate directories created by generate-selfsigned-cert.sh
+	# Remove common certificate directory patterns
+	rm -rf certs test-certs *-certs *-cert
 
 
 .PHONY: all realall

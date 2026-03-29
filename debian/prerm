@@ -6,7 +6,11 @@ case "$1" in
 		# been purged.
 
 		# shutdown service
-		service stud stop
+		if command -v systemctl >/dev/null 2>&1; then
+			systemctl stop stud.service >/dev/null 2>&1 || true
+		else
+			service stud stop >/dev/null 2>&1 || true
+		fi
 
 		;;
 	

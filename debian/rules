@@ -8,8 +8,8 @@ override_dh_auto_clean:
 	make clean
 
 override_dh_auto_configure:
-	if [ ! -f ebtree-6.0.6.tar.gz ]; then wget http://1wt.eu/tools/ebtree/ebtree-6.0.6.tar.gz; fi
-	if [ ! -d ebtree ]; then tar zxpf ebtree-6.0.6.tar.gz; mv ebtree-6.0.6 ebtree; fi
+	if [ ! -f ebtree-6.0.8.tar.gz ]; then wget http://1wt.eu/tools/ebtree/ebtree-6.0.8.tar.gz; fi
+	if [ ! -d ebtree ]; then tar zxpf ebtree-6.0.8.tar.gz; mv ebtree-6.0.8 ebtree; fi
 
 override_dh_auto_build:
 	make USE_SHARED_CACHE=1 PREFIX=/usr
@@ -21,13 +21,68 @@ override_dh_auto_install:
 	dh_installdirs
 	make install DESTDIR=$(CURDIR)/debian/stud PREFIX=/usr
 
-	# create stud instance configuration directory
+	# Install init.d script
+	install -d $(CURDIR)/debian/stud/etc/init.d
+	install -m 755 init.stud $(CURDIR)/debian/stud/etc/init.d/stud
+
+	# Install systemd service file
+	install -d $(CURDIR)/debian/stud/lib/systemd/system
+	install -m 644 stud.service $(CURDIR)/debian/stud/lib/systemd/system/
+
+	# Install configuration examples to /usr/share/doc/stud/examples/
+	install -d $(CURDIR)/debian/stud/usr/share/doc/stud/examples
+	install -m 644 stud.conf.example $(CURDIR)/debian/stud/usr/share/doc/stud/examples/
+	install -m 755 stud-wrapper.sh $(CURDIR)/debian/stud/usr/share/doc/stud/examples/
+	install -m 644 stud.service.wrapper $(CURDIR)/debian/stud/usr/share/doc/stud/examples/
+
+	# create stud instance configuration directory /etc/stud/
 	mkdir -p $(CURDIR)/debian/stud/etc/stud
 	chown -R root:root $(CURDIR)/debian/stud/etc/stud
-	chmod 700 $(CURDIR)/debian/stud/etc/stud
-	echo "Run /etc/init.d/stud --sample-config > /etc/stud/something.conf for default instance configuration" >> "$(CURDIR)/debian/stud/etc/stud/README.TXT"
+	chmod 755 $(CURDIR)/debian/stud/etc/stud
+	
+	# Install default configuration file to /etc/stud/
+	install -m 644 stud.conf.example $(CURDIR)/debian/stud/etc/stud/stud.conf.example
+	
+	# Install certificate generation script to /etc/stud/
+	install -m 755 generate-selfsigned-cert.sh $(CURDIR)/debian/stud/etc/stud/
+	
+	# Create README with instructions
+	( \
+		echo "stud Configuration Directory"; \
+		echo "============================"; \
+		echo ""; \
+		echo "This directory contains configuration files and utilities for stud."; \
+		echo ""; \
+		echo "Files:"; \
+		echo "  stud.conf.example    - Example configuration file"; \
+		echo "  generate-selfsigned-cert.sh - Script to generate self-signed certificates"; \
+		echo ""; \
+		echo "Quick Start:"; \
+		echo "  1. Generate a self-signed certificate:"; \
+		echo "     cd /etc/stud"; \
+		echo "     ./generate-selfsigned-cert.sh yourdomain.com /etc/ssl/stud"; \
+		echo ""; \
+		echo "  2. Create a configuration file:"; \
+		echo "     cp stud.conf.example /etc/stud/myapp.conf"; \
+		echo "     edit /etc/stud/myapp.conf to set:"; \
+		echo "       - FRONTEND address"; \
+		echo "       - BACKEND address"; \
+		echo "       - CERT_FILE=\"/etc/ssl/stud/yourdomain.com.pem\""; \
+		echo ""; \
+		echo "  3. Start stud with your configuration:"; \
+		echo "     stud --config=/etc/stud/myapp.conf"; \
+		echo ""; \
+		echo "  4. Or use the init script:"; \
+		echo "     /etc/init.d/stud start"; \
+		echo ""; \
+		echo "Service Management:"; \
+		echo "  - Systemd: systemctl start|stop|restart|status stud"; \
+		echo "  - SysV: service stud start|stop|restart|status"; \
+		echo ""; \
+		echo "For more examples, see /usr/share/doc/stud/examples/"; \
+	) > "$(CURDIR)/debian/stud/etc/stud/README.TXT"
 
 %:
-	dh $@
+	dh $@ --with systemd
 
 # EOF

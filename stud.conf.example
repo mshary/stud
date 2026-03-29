@@ -1,0 +1,128 @@
+# stud configuration file example
+# This file can be used with --config option or parsed by wrapper scripts
+#
+# NOTE: This file uses the actual stud configuration format (lowercase keys with dashes)
+#       which is compatible with stud --default-config output
+
+# Listening address. REQUIRED.
+#
+# type: string
+# syntax: [HOST]:PORT
+frontend = "[*]:8443"
+
+# Upstream server address. REQUIRED.
+#
+# type: string
+# syntax: [HOST]:PORT.
+backend = "[127.0.0.1]:8000"
+
+# SSL x509 certificate file. REQUIRED.
+# List multiple certs to use SNI. Certs are used in the order they
+# are listed; the last cert listed will be used if none of the others match
+#
+# type: string
+pem-file = "/etc/ssl/certs/stud.pem"
+
+# SSL protocol (choose one: tls, ssl, tls11, tls12, tls13, tls-all)
+#
+# tls = on
+# ssl = off
+# tls11 = off
+# tls12 = on
+# tls13 = off
+# tls-all = off
+
+# List of allowed SSL ciphers.
+#
+# Run openssl ciphers for list of available ciphers.
+# type: string
+ciphers = "ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256"
+
+# Enforce server cipher list order
+#
+# type: boolean
+prefer-server-ciphers = on
+
+# Use specified SSL engine
+#
+# type: string
+# ssl-engine = "auto"
+
+# Client mode (enables client proxy mode)
+#
+# type: boolean
+client = off
+
+# Number of worker processes
+#
+# type: integer
+workers = 4
+
+# Listen backlog size
+#
+# type: integer
+backlog = 1024
+
+# TCP socket keepalive interval in seconds
+#
+# type: integer
+keepalive = 3600
+
+# Chroot directory
+#
+# type: string
+# chroot = "/var/lib/stud"
+
+# Set uid after binding a socket
+#
+# type: string
+# user = "stud"
+
+# Set gid after binding a socket
+#
+# type: string
+# group = "stud"
+
+# Quiet execution, report only error messages
+#
+# type: boolean
+quiet = off
+
+# Use syslog for logging
+#
+# type: boolean
+syslog = on
+
+# Syslog facility to use
+#
+# type: string
+syslog-facility = "daemon"
+
+# Report client address by writing IP before sending data
+#
+# NOTE: This option is mutually exclusive with option write-proxy and proxy-proxy.
+#
+# type: boolean
+write-ip = off
+
+# Report client address using SENDPROXY protocol, see
+# http://haproxy.1wt.eu/download/1.5/doc/proxy-protocol.txt
+# for details.
+#
+# NOTE: This option is mutually exclusive with option write-ip and proxy-proxy.
+#
+# type: boolean
+write-proxy = on
+
+# Proxy an existing SENDPROXY protocol header through this request.
+#
+# NOTE: This option is mutually exclusive with option write-ip and write-proxy.
+#
+# type: boolean
+proxy-proxy = off
+
+# Run as daemon
+#
+# type: boolean
+# NOTE: For systemd, set to off
+daemon = off

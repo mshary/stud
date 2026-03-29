@@ -1,0 +1,105 @@
+[Unit]
+Description=stud - The Scalable TLS Unwrapping Daemon
+Documentation=man:stud(8)
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+# User and group to run as (drop privileges)
+# User=stud
+# Group=stud
+
+# Main executable with all available options
+# Basic configuration (required)
+ExecStart=/usr/local/bin/stud \
+  --frontend="[::]:8443" \
+  --backend="127.0.0.1:8000" \
+  /etc/ssl/certs/stud.pem
+
+# Encryption/TLS options (choose one)
+#  --tls                   # TLSv1 (default)
+#  --ssl                   # SSLv3 (implies no TLSv1)
+#  --tls11                 # TLSv1.1 only
+#  --tls12                 # TLSv1.2 only
+#  --tls13                 # TLSv1.3 only
+#  --tls-all               # All TLS versions (TLSv1.0 through TLSv1.3)
+
+# Cipher and engine options
+#  --ciphers="HIGH:!aNULL:!MD5" \
+#  --ssl-engine="auto" \
+#  --prefer-server-ciphers
+
+# Socket options
+#  --client                # Enable client proxy mode
+#  --backend="host,port"   # Backend [connect]
+#  --frontend="host,port"  # Frontend [bind]
+
+# Performance options
+#  --workers=4 \
+#  --backlog=1024 \
+#  --keepalive=3600
+
+# Security options
+#  --chroot=/var/lib/stud \
+#  --user=stud \
+#  --group=stud
+
+# Logging options
+#  --quiet \
+#  --syslog \
+#  --syslog-facility=daemon
+
+# Other options
+#  --write-ip \
+#  --write-proxy \
+#  --proxy-proxy
+
+# Daemon mode (required for systemd)
+#  --daemon
+
+# Example with all options commented out:
+# ExecStart=/usr/local/bin/stud \
+#   --frontend="[::]:8443" \
+#   --backend="127.0.0.1:8000" \
+#   --tls12 \
+#   --ciphers="ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256" \
+#   --prefer-server-ciphers \
+#   --workers=4 \
+#   --backlog=1024 \
+#   --keepalive=3600 \
+#   --chroot=/var/lib/stud \
+#   --user=stud \
+#   --group=stud \
+#   --syslog \
+#   --syslog-facility=daemon \
+#   --write-proxy \
+#   --daemon \
+#   /etc/ssl/certs/stud.pem
+
+# Working directory
+WorkingDirectory=/var/lib/stud
+
+# Security and resource limits
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/stud
+ReadOnlyPaths=/etc/ssl/certs
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=512
+
+# Restart policy
+Restart=on-failure
+RestartSec=5s
+
+# Kill settings
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=30s
+
+[Install]
+WantedBy=multi-user.target

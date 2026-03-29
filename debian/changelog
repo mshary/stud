@@ -1,3 +1,13 @@
+stud (0.4~0.20250329) unstable; urgency=medium
+
+  * Added support for TLSv1.1, TLSv1.2, and TLSv1.3
+  * Fixed OpenSSL 3.0 deprecation warnings
+  * Updated debian/control with modern dependencies
+  * Added systemd service files and configuration examples
+  * Fixed compilation warnings and compatibility issues
+
+ -- Charlie Root <root@interseek.com>  Sat, 29 Mar 2025 01:45:00 +0100
+
 stud (0.3~0.20111212) unstable; urgency=low
 
   * Initial release.

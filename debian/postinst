@@ -5,6 +5,44 @@ case $1 in
 	# information, do it here.
 	configure)
 		mkdir -p /var/run/stud
+		
+		# Enable service on installation
+		if [ -d /run/systemd/system ]; then
+			# Systemd
+			systemctl enable stud.service >/dev/null 2>&1 || true
+			echo "Systemd service enabled. Use: systemctl start stud"
+		else
+			# SysV init
+			if [ -x /usr/sbin/update-rc.d ]; then
+				update-rc.d stud defaults >/dev/null 2>&1 || true
+				echo "Init.d service enabled. Use: service stud start"
+			fi
+		fi
+		
+		# Display installation information
+		echo
+		echo "stud installation complete!"
+		echo
+		echo "Configuration files have been installed to:"
+		echo "  /etc/stud/stud.conf.example    - Example configuration"
+		echo "  /etc/stud/generate-selfsigned-cert.sh - Certificate generation script"
+		echo "  /etc/stud/README.TXT           - Quick start guide"
+		echo
+		echo "Quick start:"
+		echo "  1. Generate a certificate:"
+		echo "     cd /etc/stud"
+		echo "     ./generate-selfsigned-cert.sh yourdomain.com /etc/ssl/stud"
+		echo
+		echo "  2. Create a configuration:"
+		echo "     cp /etc/stud/stud.conf.example /etc/stud/myapp.conf"
+		echo "     edit /etc/stud/myapp.conf"
+		echo
+		echo "  3. Start stud:"
+		echo "     stud --config=/etc/stud/myapp.conf"
+		echo "     # or use service: systemctl start stud"
+		echo
+		echo "For more examples, see /usr/share/doc/stud/examples/"
+		echo
 		;;
 
 	# Back out of an attempt to upgrade this package FROM THIS VERSION
@@ -32,7 +70,13 @@ case $1 in
 
 esac
 
-if service stud status >/dev/null 2>&1; then
+if command -v systemctl >/dev/null 2>&1 && systemctl is-active stud.service >/dev/null 2>&1; then
+	echo 
+	echo "              !!!! WARNING !!!!"
+	echo 
+	echo "stud is running, you should restart it."
+	echo
+elif service stud status >/dev/null 2>&1; then
 	echo 
 	echo "              !!!! WARNING !!!!"
 	echo 

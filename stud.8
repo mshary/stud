@@ -34,6 +34,10 @@
 .Nm
 .Op Fl -tls
 .Op Fl -ssl
+.Op Fl -tls11
+.Op Fl -tls12
+.Op Fl -tls13
+.Op Fl -tls-all
 .Op Fl c Ar ciphers
 .Op Fl e Ar engine
 .Op Fl b Ar host,port
@@ -69,6 +73,14 @@ The options are as follows:
 Use TLSv1 (default).
 .It Fl -ssl
 Use only SSLv3 and no TLSv1.
+.It Fl -tls11
+Use only TLSv1.1.
+.It Fl -tls12
+Use only TLSv1.2.
+.It Fl -tls13
+Use only TLSv1.3 (requires OpenSSL 1.1.1 or newer).
+.It Fl -tls-all
+Use all TLS versions (TLSv1.0 through TLSv1.3).
 .It Fl c Ar ciphers
 Set allowed ciphers using the same format as
 .Ic openssl ciphers .

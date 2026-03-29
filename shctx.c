@@ -169,6 +169,11 @@ int shctx_new_cb(SSL *ssl, SSL_SESSION *sess) {
 	unsigned char *data,*p;
 	unsigned int data_len;
 	unsigned char encsess[SHSESS_MAX_ENCODED_LEN];
+	const unsigned char *session_id;
+	unsigned int session_id_length;
+
+	/* Get session ID using OpenSSL API */
+	session_id = SSL_SESSION_get_id(sess, &session_id_length);
 
 	/* check if session reserved size in aligned buffer is large enougth for the ASN1 encode session */
 	data_len=i2d_SSL_SESSION(sess, NULL);
@@ -185,7 +190,7 @@ int shctx_new_cb(SSL *ssl, SSL_SESSION *sess) {
 
 	shsess_tree_delete(shsess);
 
-	shsess_set_key(shsess, sess->session_id, sess->session_id_length);
+	shsess_set_key(shsess, session_id, session_id_length);
 
 	/* it returns the already existing node or current node if none, never returns null */
 	shsess = shsess_tree_insert(shsess);
@@ -204,9 +209,9 @@ int shctx_new_cb(SSL *ssl, SSL_SESSION *sess) {
 	if (shared_session_new_cbk) { /* if user level callback is set */
 
 		/* copy sessionid padded with 0 into the sessionid + data aligned buffer */
-		memcpy(encsess, sess->session_id, sess->session_id_length);
-		if (sess->session_id_length < SSL_MAX_SSL_SESSION_ID_LENGTH)
-			memset(encsess+sess->session_id_length, 0, SSL_MAX_SSL_SESSION_ID_LENGTH-sess->session_id_length);
+		memcpy(encsess, session_id, session_id_length);
+		if (session_id_length < SSL_MAX_SSL_SESSION_ID_LENGTH)
+			memset(encsess+session_id_length, 0, SSL_MAX_SSL_SESSION_ID_LENGTH-session_id_length);
 
 		shared_session_new_cbk(encsess, SSL_MAX_SSL_SESSION_ID_LENGTH+data_len, SSL_SESSION_get_time(sess));
 	}
@@ -215,7 +220,7 @@ int shctx_new_cb(SSL *ssl, SSL_SESSION *sess) {
 }
 
 /* SSL callback used on lookup an existing session cause none found in internal cache */
-SSL_SESSION *shctx_get_cb(SSL *ssl, unsigned char *key, int key_len, int *do_copy) {
+SSL_SESSION *shctx_get_cb(SSL *ssl, const unsigned char *key, int key_len, int *do_copy) {
 	(void)ssl;
 	struct shared_session *shsess;
 	unsigned char data[SHSESS_MAX_DATA_LEN], *p;
@@ -238,7 +243,7 @@ SSL_SESSION *shctx_get_cb(SSL *ssl, unsigned char *key, int key_len, int *do_cop
 	shared_context_lock();
 
 	/* lookup for session */
-	shsess = shsess_tree_lookup(key);
+	shsess = shsess_tree_lookup((unsigned char *)key);
 	if(!shsess) {
 		/* no session found: unlock cache and exit */
 		shared_context_unlock();
@@ -272,19 +277,23 @@ void shctx_remove_cb(SSL_CTX *ctx, SSL_SESSION *sess) {
 	(void)ctx;
 	struct shared_session *shsess;
 	unsigned char tmpkey[SSL_MAX_SSL_SESSION_ID_LENGTH];
-	unsigned char *key = sess->session_id;
+	const unsigned char *session_id;
+	unsigned int session_id_length;
+
+	/* Get session ID using OpenSSL API */
+	session_id = SSL_SESSION_get_id(sess, &session_id_length);
 
 	/* tree key is zeros padded sessionid */
-	if ( sess->session_id_length < SSL_MAX_SSL_SESSION_ID_LENGTH ) {
-		memcpy(tmpkey, sess->session_id, sess->session_id_length);
-		memset(tmpkey+sess->session_id_length, 0, SSL_MAX_SSL_SESSION_ID_LENGTH-sess->session_id_length);
-		key = tmpkey;
+	if ( session_id_length < SSL_MAX_SSL_SESSION_ID_LENGTH ) {
+		memcpy(tmpkey, session_id, session_id_length);
+		memset(tmpkey+session_id_length, 0, SSL_MAX_SSL_SESSION_ID_LENGTH-session_id_length);
+		session_id = tmpkey;
 	}
 
 	shared_context_lock();
 
 	/* lookup for session */
-	shsess = shsess_tree_lookup(key);
+	shsess = shsess_tree_lookup((unsigned char *)session_id);
         if ( shsess )  {
 		shsess_set_free(shsess);
 	}
